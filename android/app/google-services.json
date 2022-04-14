@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "193316244161",
+    "project_id": "cecattot-57f40",
+    "storage_bucket": "cecattot-57f40.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193316244161:android:2036b842ffed08ae81a240",
+        "android_client_info": {
+          "package_name": "com.example.autenticacao"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "193316244161-1rb037vd0n9ccdg6kcs63oi3jme9fst2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsGap79VMP4sgVBJhkOmKOjno35rLageQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193316244161-1rb037vd0n9ccdg6kcs63oi3jme9fst2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "193316244161-ehksvt94vvtinag1phagc941b0kn0d9t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cecattot.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:193316244161:android:6087ba4bc91f874381a240",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "193316244161-1rb037vd0n9ccdg6kcs63oi3jme9fst2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsGap79VMP4sgVBJhkOmKOjno35rLageQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "193316244161-1rb037vd0n9ccdg6kcs63oi3jme9fst2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "193316244161-ehksvt94vvtinag1phagc941b0kn0d9t.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.cecattot.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
