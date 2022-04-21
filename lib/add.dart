@@ -100,11 +100,10 @@ class _addState extends State<add> {
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('AlertDialog Title'),
+            title: const Text('Erro'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: const <Widget>[
-                  Text('Erro'),
                   Text('Os campos não podem ter valor nulo.'),
                 ],
               ),

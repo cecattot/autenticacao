@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'add.dart';
 import 'jogo.dart';
 // Import the generated file
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +66,8 @@ class _myLoginPageState extends State<myLoginPage> {
   Widget build(BuildContext context) {
     final txtPassword = TextEditingController();
     final txtEmail = TextEditingController();
+    txtPassword.text = "123456";
+    txtEmail.text = "raulcctt@gmail.com";
 
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -117,12 +121,32 @@ class _myLoginPageState extends State<myLoginPage> {
                               child: ElevatedButton(
                                 style: TextButton.styleFrom(
                                     backgroundColor: Colors.blueGrey),
-                                onPressed: () {
-                                  setState(() {
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => MyPlay()
-                                    ));
-                                  });
+                                onPressed: () async {
+                                  FirebaseAuth auth = FirebaseAuth.instance;
+                                  try {
+                                    UserCredential credencial =
+                                        await auth.signInWithEmailAndPassword(
+                                        email: txtEmail.text, password: txtPassword.text);
+                                    User? user = credencial.user;
+                                    if(user != null && user.emailVerified){
+                                      print(user.displayName!);
+                                      setState(() {
+                                        Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (context) => MyPlay(user: user)
+                                        ));
+                                      });
+                                    } else if (user != null && !user.emailVerified) {
+                                      popUp('E-mail não verificado');
+                                    }
+                                  } on FirebaseAuthException catch (e) {
+                                    if(e.code == "user-not-found"){
+                                      popUp('Usuário não encontrado');
+                                    } else if (e.code == "wrong-password") {
+                                      popUp('Senha Incorreta');
+                                    } else if (e.code == "invalid-email") {
+                                      popUp('E-mail inválido');
+                                    }
+                                  }
                                 },
                                 child: Text("Login"),
                               ),
@@ -151,9 +175,100 @@ class _myLoginPageState extends State<myLoginPage> {
               Expanded(flex: 1, child: Container()),
             ],
           )),
+          Expanded(flex: 1, child:  Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+                child: MaterialButton(
+                  color: Colors.teal[100],
+                  elevation: 10,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                    Container(
+                    height: 30.0,
+                    width: 30.0,
+                    decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    ),
+                    ),
+                    SizedBox(
+                    width: 20,
+                    ),
+                    Text("Sign In with Google")
+                    ],
+                    ),
+
+                    // by onpressed we call the function signup function
+                    onPressed: () {
+                    signup(context);
+                  },
+              ),
+            ),
+          ),
           Expanded(flex: 1, child: Container()),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Future<void> signup(BuildContext context) async {
+      print("######################################################################");
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+      print("1");
+    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+      print("2");
+    if (googleSignInAccount != null) {
+      print("3");
+      final GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount.authentication;
+      print("4");
+      final AuthCredential authCredential = GoogleAuthProvider.credential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+      print("4");
+
+      // Getting users credential
+      UserCredential result = await auth.signInWithCredential(authCredential);
+      User? user = result.user;
+      print("######################################################################");
+      print(user);
+      print(result);
+      print("######################################################################");
+
+      if (result != null) {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => MyPlay(user: result.user!)
+        ));
+      }  // if result not null we simply call the MaterialpageRoute,
+      // for go to the HomePage screen
+    }
+  }
+
+  Future<void> popUp(String texto){
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Erro'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text("$texto"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
