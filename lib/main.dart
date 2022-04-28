@@ -1,11 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'add.dart';
 import 'jogo.dart';
+
 // Import the generated file
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
@@ -59,11 +63,12 @@ class myLoginPage extends StatefulWidget {
 }
 
 class _myLoginPageState extends State<myLoginPage> {
-
   @override
   Widget build(BuildContext context) {
     final txtPassword = TextEditingController();
     final txtEmail = TextEditingController();
+    txtPassword.text = "123456";
+    txtEmail.text = "raulcctt@gmail.com";
 
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -80,82 +85,171 @@ class _myLoginPageState extends State<myLoginPage> {
       body: Column(
         children: [
           Expanded(flex: 1, child: Container()),
-          Expanded(flex: 1, child: Row(
-            children: [
-              Expanded(flex: 1, child: Container()),
-              Expanded(flex: 20, child: Column(
+          Expanded(
+              flex: 1,
+              child: Row(
                 children: [
-                  Expanded(flex: 1, child: Container(
-                    child: TextField(
-                        controller: txtEmail,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                            icon: Icon(Icons.edit), //icon of text field
-                            labelText: "email" //label text of field
-                        )
-                    ),
-                    alignment: Alignment.centerRight,
-                    color: Colors.white70,
-                  )),
-                  Expanded(flex: 1, child: Container(
-                    child: TextField(
-                        controller: txtPassword,
-                        obscureText: true,//icon of text field
-                        decoration: InputDecoration(
-                            icon: Icon(Icons.password),
-                            labelText: "password" //label text of field
-                        )
-                    ),
-                    alignment: Alignment.centerRight,
-                    color: Colors.white70,
-                  )),
-                  Center(
-                      child: Row(
-                          children: [
-                            Expanded(flex: 2, child: Container()),
+                  Expanded(flex: 1, child: Container()),
+                  Expanded(
+                      flex: 20,
+                      child: Column(
+                        children: [
+                          Expanded(
+                              flex: 1,
+                              child: Container(
+                                child: TextField(
+                                    controller: txtEmail,
+                                    keyboardType: TextInputType.emailAddress,
+                                    decoration: InputDecoration(
+                                        icon: Icon(
+                                            Icons.edit), //icon of text field
+                                        labelText: "email" //label text of field
+                                        )),
+                                alignment: Alignment.centerRight,
+                                color: Colors.white70,
+                              )),
+                          Expanded(
+                              flex: 1,
+                              child: Container(
+                                child: TextField(
+                                    controller: txtPassword,
+                                    obscureText: true, //icon of text field
+                                    decoration: InputDecoration(
+                                        icon: Icon(Icons.password),
+                                        labelText:
+                                            "password" //label text of field
+                                        )),
+                                alignment: Alignment.centerRight,
+                                color: Colors.white70,
+                              )),
+                          Center(
+                              child: Row(children: [
+                            Expanded(flex: 2, child: Container(
+                              margin: const EdgeInsets.all(1.0),
+                              child: SignInButton(
+                                Buttons.Google,
+                                text: "Sign up with Google",
+                                onPressed: () {
+                                  signup(context);
+                                },
+                              ),
+                            )),
                             Container(
                               child: ElevatedButton(
                                 style: TextButton.styleFrom(
                                     backgroundColor: Colors.blueGrey),
-                                onPressed: () {
-                                  setState(() {
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => MyPlay()
-                                    ));
-                                  });
+                                onPressed: () async {
+                                  FirebaseAuth auth = FirebaseAuth.instance;
+                                  try {
+                                    UserCredential credencial =
+                                        await auth.signInWithEmailAndPassword(
+                                            email: txtEmail.text,
+                                            password: txtPassword.text);
+                                    User? user = credencial.user;
+                                    if (user != null && user.emailVerified) {
+                                      print(user.displayName!);
+                                      setState(() {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    MyPlay(user: user)));
+                                      });
+                                    } else if (user != null &&
+                                        !user.emailVerified) {
+                                      popUp('E-mail não verificado');
+                                    }
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == "user-not-found") {
+                                      popUp('Usuário não encontrado');
+                                    } else if (e.code == "wrong-password") {
+                                      popUp('Senha Incorreta');
+                                    } else if (e.code == "invalid-email") {
+                                      popUp('E-mail inválido');
+                                    }
+                                  }
                                 },
                                 child: Text("Login"),
                               ),
-                              margin: const EdgeInsets.all(1.0),),
+                              margin: const EdgeInsets.all(1.0),
+                            ),
                             Container(
                               child: ElevatedButton(
                                 style: TextButton.styleFrom(
                                     backgroundColor: Colors.blueGrey),
                                 onPressed: () {
                                   setState(() {
-                                    Navigator.of(context).push(MaterialPageRoute(
-                                        builder: (context) => add()
-                                    ));
+                                    Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                            builder: (context) => add()));
                                   });
                                 },
                                 child: Text("Cadastrar"),
                               ),
                               margin: const EdgeInsets.all(1.0),
                             ),
-                          ]
-                      )
-                  ),
+                          ])),
+                        ],
+                      )),
+                  Expanded(flex: 1, child: Container()),
                 ],
-              )
-              ),
-              Expanded(flex: 1, child: Container()),
-            ],
-          )),
+              )),
+
           Expanded(flex: 1, child: Container()),
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Future<void> signup(BuildContext context) async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleSignInAccount =
+        await googleSignIn.signIn();
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+      final AuthCredential authCredential = GoogleAuthProvider.credential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+
+      // Getting users credential
+      UserCredential result = await auth.signInWithCredential(authCredential);
+      User? user = result.user;
+
+      if (result != null) {
+        Navigator.of(context).pop();
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => MyPlay(user: result.user!)));
+      } // if result not null we simply call the MaterialpageRoute,
+      // for go to the HomePage screen
+    }
+  }
+
+  Future<void> popUp(String texto) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Erro'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text("$texto"),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
-
-

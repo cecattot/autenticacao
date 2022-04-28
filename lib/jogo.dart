@@ -1,8 +1,12 @@
+import 'package:autenticacao/main.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 
 class MyPlay extends StatelessWidget {
-  const MyPlay({Key? key}) : super(key: key);
+  const MyPlay({Key? key, required this.user}) : super(key: key);
+  final User user;
 
   // This widget is the root of your application.
   @override
@@ -21,13 +25,14 @@ class MyPlay extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page', user: user),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, required this.user}) : super(key: key);
+  final User user;
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -41,11 +46,24 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState(usuario: user);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  _MyHomePageState({required this.usuario});
   int _counter = 0;
+  User usuario;
+  String name = "NAME";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    this.name = usuario.displayName.toString();
+    super.initState();
+    setState(() {
+      name;
+    });
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -92,12 +110,27 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Container(
+              child: Image.network(usuario.photoURL!,
+                fit: BoxFit.fitWidth,),
+            ),
+            Text(
+              '$name have pushed the button this many times:',
             ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
+            ),
+            Container(
+              child: ElevatedButton(
+                style: TextButton.styleFrom(
+                    backgroundColor: Colors.blueGrey),
+                onPressed: () {
+                  logout();
+                },
+                child: Text("Deslogar"),
+              ),
+              margin: const EdgeInsets.all(1.0),
             ),
           ],
         ),
@@ -106,7 +139,19 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),  // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future logout() async{
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    await googleSignIn.disconnect();
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    FirebaseAuth.instance.signOut();
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => MyLogin()
+    ));
+
   }
 }
